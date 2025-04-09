@@ -1,12 +1,42 @@
-# React + Vite
+# 🛒 React API Store - Consumo de Productos con React y Axios
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![React](https://img.shields.io/badge/React-2023-blue)](https://reactjs.org/)
+[![Axios](https://img.shields.io/badge/Axios-HTTP%20Client-yellow)](https://axios-http.com/)
+[![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-Currently, two official plugins are available:
+Este proyecto es una aplicación desarrollada con **React** que consume productos desde una **API pública** utilizando **Axios**. Está diseñado para practicar el consumo de APIs REST y mostrar productos dinámicamente con estilos personalizados.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Expanding the ESLint configuration
+## 🧰 Tecnologías utilizadas
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- ⚛️ React
+- 📦 Axios
+- 🎨 CSS
+- 🔗 Fake Store API → [https://fakestoreapi.com/products](https://fakestoreapi.com/products)
+
+---
+
+## ✨ Características
+
+- Listado dinámico de productos con imagen, descripción y precio.
+- Estilizado responsive con CSS personalizado.
+- Consumo de API con Axios.
+- Manejo de estado con `useState` y `useEffect`.
+
+---
+
+## 📦 Instalación
+
+```bash
+# Clona el repositorio
+git clone https://github.com/tu-usuario/nombre-del-repo.git
+
+# Entra al directorio del proyecto
+cd nombre-del-repo
+
+# Instala las dependencias
+npm install
+
+# Ejecuta la app
+npm start
+
