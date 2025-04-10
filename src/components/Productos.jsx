@@ -1,42 +1,68 @@
 import { useEffect, useState } from "react";
-import "./productos.css";
 import axios from "axios";
+import CardProductos from "./CardProductos";
+import "../estilos/Productos.css"; // Asumiendo que el archivo CSS estará en la misma carpeta
 
-const Calculadora = () => {
+const Productos = () => {
   const [productos, setProductos] = useState();
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const URL_API = import.meta.env.VITE_API_URL;
+    const fetchProductos = async () => {
+      try {
+        const URL_API = import.meta.env.VITE_API_URL;
+        const response = await axios.get(`${URL_API}products`);
+        setProductos(response.data);
+        setCargando(false);
+      } catch (error) {
+        console.error("Error al cargar los productos:", error);
+        setError(
+          "No pudimos cargar los productos. Por favor, intenta más tarde."
+        );
+        setCargando(false);
+      }
+    };
 
-    axios
-      .get(`${URL_API}products`)
-      .then((data) => {
-        console.log(data);
-        setProductos(data.data);
-      })
-      .catch((error) => {
-        console.error("La peticion fallo", error);
-      });
+    fetchProductos();
   }, []);
 
-  if (!productos) return <span>Cargando...</span>;
+  if (cargando) {
+    return (
+      <div className="loading-container">
+        <div className="loader"></div>
+        <p>Cargando productos...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="error-message">{error}</div>;
+  }
 
   return (
-    <>
-      <h1 className="titulo">Productos flcode </h1>
+    <div className="productos-container">
+      <header className="productos-header">
+        <h1>Productos FlCode</h1>
+        <p className="productos-subtitulo">
+          Descubre nuestra colección de productos
+        </p>
+      </header>
 
-      <ul className="lista-productos">
+      <div className="productos-grid">
         {productos.map(({ id, image, title, description, price }) => (
-          <li key={id} className="producto-card">
-            <h2>{title}</h2>
-            <img src={image} alt={title} />
-            <p>{description}</p>
-            <p className="precio">Precio: ${price}</p>
-          </li>
+          <CardProductos
+            key={id}
+            id={id}
+            image={image}
+            title={title}
+            description={description}
+            price={price}
+          />
         ))}
-      </ul>
-    </>
+      </div>
+    </div>
   );
 };
 
-export default Calculadora;
+export default Productos;

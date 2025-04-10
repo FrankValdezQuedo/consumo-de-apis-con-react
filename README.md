@@ -6,7 +6,6 @@
 
 Este proyecto es una aplicación desarrollada con **React** que consume productos desde una **API pública** utilizando **Axios**. Está diseñado para practicar el consumo de APIs REST y mostrar productos dinámicamente con estilos personalizados.
 
-
 ## 🧰 Tecnologías utilizadas
 
 - ⚛️ React
@@ -29,7 +28,7 @@ Este proyecto es una aplicación desarrollada con **React** que consume producto
 
 ```bash
 # Clona el repositorio
-git clone https://github.com/tu-usuario/nombre-del-repo.git
+git clone https://github.com/FrankValdezQuedo/consumo-de-apis-con-react.git
 
 # Entra al directorio del proyecto
 cd nombre-del-repo
@@ -40,3 +39,4 @@ npm install
 # Ejecuta la app
 npm start
 
+```
