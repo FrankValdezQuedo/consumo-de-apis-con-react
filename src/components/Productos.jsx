@@ -43,14 +43,13 @@ const Productos = () => {
   return (
     <div className="productos-container">
       <header className="productos-header">
-        <h1>Productos FlCode</h1>
         <p className="productos-subtitulo">
           Descubre nuestra colección de productos
         </p>
       </header>
 
       <div className="productos-grid">
-        {productos.map(({ id, image, title, description, price }) => (
+        {productos.map(({ id, image, title, description, price, category }) => (
           <CardProductos
             key={id}
             id={id}
@@ -58,6 +57,7 @@ const Productos = () => {
             title={title}
             description={description}
             price={price}
+            category={category}
           />
         ))}
       </div>
