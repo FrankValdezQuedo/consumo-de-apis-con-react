@@ -1,22 +1,21 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useCart } from "../contexto/CardContext";
 import "../../estilos/CardProdutos.css";
 
 const CardProducto = ({ id, title, image, description, price, category }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const { carrito, agregarAlCarrito } = useCart(); 
 
   const descripcionCorta =
     description.length > 90 ? description.slice(0, 90) + "..." : description;
 
   const addCarrito = () => {
-    const carritoIds = JSON.parse(localStorage.getItem("carrito")) || [];
-
-    if (!carritoIds.includes(id)) {
-      carritoIds.push(id);
-      localStorage.setItem("carrito", JSON.stringify(carritoIds));
+    if (!carrito.includes(id)) {
+      agregarAlCarrito(id); 
       alert("ID agregado al carrito 🛒");
-      console.log(carritoIds);
+      console.log([...carrito, id]);
     } else {
       alert("Este producto ya está en el carrito.");
     }
