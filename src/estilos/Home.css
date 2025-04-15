@@ -18,14 +18,8 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  opacity: 0;
   transform: translateY(20px);
   transition: opacity 0.8s ease, transform 0.8s ease;
-}
-
-.home-container.loaded {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 .section-title {
