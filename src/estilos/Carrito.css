@@ -1,19 +1,23 @@
-/* Carrito.css - Estilos para el componente de Carrito */
+/* Carrito.css - Estilos mejorados para el componente de Carrito */
 
 /* Variables */
 :root {
   --primary-color: #3498db;
   --primary-dark: #2980b9;
+  --primary-light: #eaf2f8;
   --secondary-color: #2c3e50;
   --accent-color: #e74c3c;
+  --accent-light: #fde8e7;
+  --success-color: #27ae60;
+  --success-light: #e8f7f0;
   --light-gray: #f5f7fa;
   --mid-gray: #e0e6ed;
   --dark-gray: #7f8c8d;
-  --success-color: #27ae60;
   --text-color: #333;
   --border-radius: 8px;
-  --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1);
   --transition-speed: 0.3s;
 }
 
@@ -23,6 +27,7 @@
   margin: 0 auto;
   padding: 2rem;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-color);
 }
 
 /* Título del carrito */
@@ -32,30 +37,32 @@
   margin-bottom: 2rem;
   text-align: center;
   position: relative;
+  font-weight: 700;
 }
 
 .carrito-titulo::after {
   content: "";
   display: block;
   width: 80px;
-  height: 3px;
+  height: 4px;
   background-color: var(--primary-color);
-  margin: 1rem auto 0;
+  margin: 0.8rem auto 0;
   border-radius: 2px;
 }
 
 /* Carrito vacío */
 .carrito-vacio {
   text-align: center;
-  padding: 3rem;
-  background-color: var(--light-gray);
+  padding: 4rem 2rem;
+  background-color: white;
   border-radius: var(--border-radius);
   margin: 2rem 0;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--mid-gray);
 }
 
 .carrito-vacio-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   color: var(--dark-gray);
 }
 
@@ -86,13 +93,14 @@
   border-radius: var(--border-radius);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
+  border: 1px solid var(--mid-gray);
 }
 
 /* Encabezado de la tabla */
 .carrito-header {
   display: grid;
   grid-template-columns: 3fr 1fr 1fr 1fr 50px;
-  padding: 1rem;
+  padding: 1rem 1.5rem;
   background-color: var(--light-gray);
   border-bottom: 1px solid var(--mid-gray);
   font-weight: 600;
@@ -113,36 +121,40 @@
   display: grid;
   grid-template-columns: 3fr 1fr 1fr 1fr 50px;
   align-items: center;
-  padding: 1rem;
+  padding: 1.5rem;
   border-bottom: 1px solid var(--mid-gray);
-  transition: background-color var(--transition-speed) ease;
+  transition: all var(--transition-speed) ease;
 }
 
 .producto-item:hover {
-  background-color: var(--light-gray);
-}
-
-/* Contenedor de imagen */
-.producto-imagen-container {
-  width: 100px;
-  height: 100px;
-  margin-right: 1rem;
-  background-color: white;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.producto-imagen {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+  background-color: var(--primary-light);
 }
 
 /* Información del producto */
 .producto-info {
   display: flex;
-  flex-direction: column;
-  padding-right: 1rem;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* Contenedor de imagen */
+.producto-imagen-container {
+  width: 80px;
+  height: 80px;
+  background-color: white;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  padding: 0.5rem;
+  border: 1px solid var(--mid-gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.producto-imagen {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
 .producto-titulo {
@@ -150,16 +162,21 @@
   font-weight: 600;
   margin: 0 0 0.5rem 0;
   color: var(--secondary-color);
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .producto-categoria {
   font-size: 0.8rem;
-  color: var(--dark-gray);
-  background-color: var(--light-gray);
+  color: var(--primary-color);
+  background-color: var(--primary-light);
   padding: 0.2rem 0.5rem;
   border-radius: 20px;
   display: inline-block;
   margin-top: 0.25rem;
+  text-transform: capitalize;
 }
 
 /* Precio, cantidad y total */
@@ -173,11 +190,12 @@
 .producto-cantidad {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
 }
 
 .cantidad-btn {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border: 1px solid var(--mid-gray);
   background-color: white;
   border-radius: 4px;
@@ -190,13 +208,14 @@
 }
 
 .cantidad-btn:hover {
-  background-color: var(--light-gray);
+  background-color: var(--primary-light);
+  border-color: var(--primary-color);
 }
 
 .cantidad-valor {
-  padding: 0 0.75rem;
-  width: 30px;
+  width: 28px;
   text-align: center;
+  font-weight: 600;
 }
 
 /* Acciones del producto */
@@ -206,23 +225,28 @@
 }
 
 .btn-eliminar {
-  width: 30px;
-  height: 30px;
-  background-color: #fff3f3;
+  width: 32px;
+  height: 32px;
+  background-color: var(--accent-light);
   color: var(--accent-color);
-  border: 1px solid #ffdbdb;
+  border: 1px solid var(--accent-color);
   border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
   transition: all 0.2s ease;
+  padding: 0;
 }
 
 .btn-eliminar:hover {
   background-color: var(--accent-color);
   color: white;
+}
+
+/* Botones con iconos */
+.btn-icon {
+  margin-right: 0.5rem;
 }
 
 /* Acciones del carrito */
@@ -245,6 +269,7 @@
   box-shadow: var(--shadow-sm);
   padding: 1.5rem;
   height: fit-content;
+  border: 1px solid var(--mid-gray);
 }
 
 .resumen-titulo {
@@ -253,6 +278,7 @@
   margin-bottom: 1.5rem;
   padding-bottom: 0.75rem;
   border-bottom: 1px solid var(--mid-gray);
+  font-weight: 600;
 }
 
 .resumen-fila {
@@ -260,14 +286,23 @@
   justify-content: space-between;
   margin-bottom: 0.75rem;
   color: var(--text-color);
+  padding: 0.5rem 0;
 }
 
 .resumen-fila.resumen-descuento {
   color: var(--accent-color);
+  background-color: var(--accent-light);
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin: 0.5rem 0;
 }
 
 .resumen-fila.resumen-envio {
   color: var(--success-color);
+  background-color: var(--success-light);
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin: 0.5rem 0;
 }
 
 .resumen-fila.resumen-total {
@@ -292,6 +327,7 @@
   border-radius: var(--border-radius) 0 0 var(--border-radius);
   outline: none;
   font-size: 0.9rem;
+  transition: border-color 0.2s ease;
 }
 
 .resumen-descuento-input input:focus {
@@ -323,6 +359,7 @@
   font-size: 0.8rem;
   color: var(--dark-gray);
   margin-bottom: 1.5rem;
+  font-style: italic;
 }
 
 /* Botón de pago */
@@ -336,31 +373,17 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
   margin-bottom: 1rem;
+  box-shadow: var(--shadow-sm);
 }
 
 .carrito-btn-pagar:hover {
   background-color: var(--primary-dark);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
-/* Métodos de pago */
-.resumen-pagos {
-  margin-top: 1.5rem;
-  font-size: 0.9rem;
-  color: var(--dark-gray);
-}
-
-.metodos-pago {
-  display: flex;
-  gap: 1rem;
-  margin-top: 0.5rem;
-}
-
-.metodo-pago {
-  font-size: 0.85rem;
-  color: var(--secondary-color);
-}
 
 /* Botones generales */
 .carrito-btn {
@@ -370,8 +393,9 @@
   cursor: pointer;
   transition: all 0.2s ease;
   text-decoration: none;
-  display: inline-block;
-  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .carrito-btn-continuar {
@@ -382,6 +406,8 @@
 
 .carrito-btn-continuar:hover {
   background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .carrito-btn-secundario {
@@ -401,7 +427,7 @@
 }
 
 .carrito-btn-vaciar:hover {
-  background-color: #fff3f3;
+  background-color: var(--accent-light);
 }
 
 /* Estado de carga (esqueletos) */
@@ -410,6 +436,16 @@
   background-color: white;
   border-radius: var(--border-radius);
   box-shadow: var(--shadow-sm);
+  border: 1px solid var(--mid-gray);
+}
+
+.skeleton-titulo {
+  height: 40px;
+  margin-bottom: 2rem;
+  background: linear-gradient(90deg, #f0f0f0 0%, #f8f8f8 50%, #f0f0f0 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--border-radius);
 }
 
 .skeleton-item {
@@ -434,15 +470,17 @@
 .carrito-error {
   text-align: center;
   padding: 3rem 2rem;
-  background-color: #fff3f3;
+  background-color: var(--accent-light);
   border-radius: var(--border-radius);
   margin: 2rem auto;
   max-width: 500px;
+  border: 1px solid var(--accent-color);
 }
 
 .carrito-error-icon {
   font-size: 3rem;
   margin-bottom: 1rem;
+  color: var(--accent-color);
 }
 
 .carrito-error h2 {
@@ -452,7 +490,7 @@
 
 .carrito-error p {
   margin-bottom: 1.5rem;
-  color: var(--dark-gray);
+  color: var(--text-color);
 }
 
 /* Media queries para responsive */

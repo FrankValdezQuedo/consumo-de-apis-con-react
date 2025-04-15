@@ -1,4 +1,4 @@
-// src/context/CartContext.jsx
+
 import { createContext, useState, useEffect, useContext } from "react";
 
 const CartContext = createContext();
@@ -20,9 +20,14 @@ export function CartProvider({ children }) {
       setCarrito([...carrito, id]);
     }
   };
+  const removeFromCart = (id) => {
+    const nuevoCarrito = carrito.filter((pid) => pid !== id);
+    setCarrito(nuevoCarrito);
+  };
+
 
   return (
-    <CartContext.Provider value={{ carrito, agregarAlCarrito }}>
+    <CartContext.Provider value={{ carrito, agregarAlCarrito,removeFromCart }}>
       {children}
     </CartContext.Provider>
   );

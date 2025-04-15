@@ -14,10 +14,10 @@ const CardProducto = ({ id, title, image, description, price, category }) => {
   const addCarrito = () => {
     if (!carrito.includes(id)) {
       agregarAlCarrito(id); 
-      alert("ID agregado al carrito 🛒");
+     
       console.log([...carrito, id]);
     } else {
-      alert("Este producto ya está en el carrito.");
+     
     }
   };
 
