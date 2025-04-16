@@ -1,18 +1,14 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import "../../estilos/Carrito.css";
-import { ShoppingCart, Trash2, ArrowLeft, RefreshCw, ShoppingBag } from "lucide-react";
 import { useCart } from "../contexto/CardContext";
-import CarritoProductos from "./CarritoProd";
 
 const Carrito = () => {
   const [productos, setProductos] = useState([]);
   const [cargando, setCargando] = useState(true);
-  const [cantidades, setCantidades] = useState({});
   const [error, setError] = useState(null);
-  const [codigoDescuento, setCodigoDescuento] = useState("");
-  const [descuentoAplicado, setDescuentoAplicado] = useState(0);
-  const {removeFromCart } = useCart();
+  const [carritoVacio, setCarritoVacio] = useState(false);
+  const { removeFromCart } = useCart();
 
   useEffect(() => {
     cargarProductos();
@@ -20,193 +16,159 @@ const Carrito = () => {
 
   const cargarProductos = async () => {
     setCargando(true);
+    setError(null);
     try {
-      const ids = JSON.parse(localStorage.getItem("carrito")) || [];
-      if (ids.length === 0) {
+      // Obtener solo IDs del carrito
+      const idsCarrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+      if (idsCarrito.length === 0) {
         setProductos([]);
+        setCarritoVacio(true);
         setCargando(false);
         return;
       }
 
+      // Cargar productos y agregar cantidad inicial (1)
       const productosData = await Promise.all(
-        ids.map(id =>
-          axios.get(`https://fakestoreapi.com/products/${id}`).then(res => res.data)
+        idsCarrito.map((id) =>
+          axios
+            .get(`https://fakestoreapi.com/products/${id}`)
+            .then((res) => ({
+              ...res.data,
+              cantidad: 1, // Cantidad inicial por defecto
+            }))
+            .catch(() => null)
         )
       );
 
-      // Inicializar cantidades
-      const cantidadesIniciales = {};
-      productosData.forEach(p => {
-        cantidadesIniciales[p.id] = 1;
-      });
-      
-      setCantidades(cantidadesIniciales);
-      setProductos(productosData);
+      const productosValidos = productosData.filter(
+        (producto) => producto !== null
+      );
+
+      if (productosValidos.length === 0) {
+        setError("No se pudieron cargar los productos del carrito.");
+      } else {
+        setProductos(productosValidos);
+      }
     } catch (e) {
       console.error("Error al cargar productos:", e);
-      setError("No pudimos cargar tus productos. Por favor, intenta nuevamente.");
+      setError("No pudimos cargar tus productos. Por favor intenta más tarde.");
     } finally {
       setCargando(false);
     }
   };
 
+  const actualizarCantidad = (id, nuevaCantidad) => {
+    if (nuevaCantidad < 1) return;
+
+    setProductos((prevProductos) =>
+      prevProductos.map((producto) =>
+        producto.id === id ? { ...producto, cantidad: nuevaCantidad } : producto
+      )
+    );
+  };
+
   const eliminarProducto = (id) => {
-    const nuevosProductos = productos.filter((p) => p.id !== id);
+    const nuevosProductos = productos.filter((producto) => producto.id !== id);
     setProductos(nuevosProductos);
-    
-    // Actualizar localStorage
-    localStorage.setItem("carrito", JSON.stringify(nuevosProductos.map(p => p.id)));
-    
-    // Actualizar cantidades
-    const nuevasCantidades = { ...cantidades };
-    delete nuevasCantidades[id];
-    setCantidades(nuevasCantidades);
+
+    // Actualizar localStorage con solo los IDs restantes
+    const nuevosIds = nuevosProductos.map((producto) => producto.id);
+    localStorage.setItem("carrito", JSON.stringify(nuevosIds));
     removeFromCart(id);
-  };
 
-  const cambiarCantidad = (id, cambio) => {
-    const nuevasCantidades = { ...cantidades };
-    const nuevaCantidad = Math.max(1, (nuevasCantidades[id] || 1) + cambio);
-    nuevasCantidades[id] = nuevaCantidad;
-    setCantidades(nuevasCantidades);
-  };
-
-  const vaciarCarrito = () => {
-    setProductos([]);
-    setCantidades({});
-    localStorage.setItem("carrito", JSON.stringify([]));
-  };
-
-  const aplicarDescuento = () => {
-    if (codigoDescuento.toLowerCase() === "descuento20") {
-      setDescuentoAplicado(0.2); // 20% de descuento
-    } else {
-      alert("Código de descuento inválido");
+    if (nuevosProductos.length === 0) {
+      setCarritoVacio(true);
     }
   };
 
-  const calcularSubtotal = () => {
-    return productos.reduce((total, p) => {
-      const cantidad = cantidades[p.id] || 1;
-      return total + (p.price * cantidad);
-    }, 0);
-  };
-
   const calcularTotal = () => {
-    const subtotal = calcularSubtotal();
-    const descuento = subtotal * descuentoAplicado;
-    const envio = subtotal > 50 ? 0 : 5;
-    return subtotal - descuento + envio;
+    return productos
+      .reduce(
+        (total, producto) => total + producto.price * producto.cantidad,
+        0
+      )
+      .toFixed(2);
   };
 
-  if (cargando) {
-    return (
-      <div className="carrito-container">
-        <div className="carrito-skeleton">
-          <div className="skeleton-titulo"></div>
-          {[1, 2, 3].map(i => (
-            <div key={i} className="skeleton-item"></div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="carrito-container">
-        <div className="carrito-error">
-          <div className="carrito-error-icon">❌</div>
-          <h2>¡Ups! Algo salió mal</h2>
-          <p>{error}</p>
-          <button className="carrito-btn carrito-btn-continuar" onClick={cargarProductos}>
-            <RefreshCw size={16} className="btn-icon" /> Intentar nuevamente
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (productos.length === 0) {
-    return (
-      <div className="carrito-container">
-        <h1 className="carrito-titulo">Tu Carrito de Compras</h1>
-        <div className="carrito-vacio">
-          <div className="carrito-vacio-icon">
-            <ShoppingCart size={64} />
-          </div>
-          <p>Tu carrito está vacío</p>
-          <p className="carrito-vacio-mensaje">¡Agrega productos para comenzar tu compra!</p>
-          <a href="/productos" className="carrito-btn carrito-btn-continuar">
-            <ShoppingBag size={16} className="btn-icon" /> Ir a Productos
-          </a>
-        </div>
-      </div>
-    );
-  }
+  if (cargando) return <div className="loading">Cargando tu carrito...</div>;
+  if (error) return <div className="error-message">{error}</div>;
+  if (carritoVacio)
+    return <div className="empty-cart">Tu carrito está vacío</div>;
 
   return (
-    <div className="carrito-container">
-      <h1 className="carrito-titulo">Tu Carrito de Compras</h1>
-      
-      <div className="carrito-contenido">
-       
-        
-        <div className="carrito-resumen">
-          <h2 className="resumen-titulo">Resumen del pedido</h2>
-          <CarritoProductos/>
-          <div className="resumen-fila">
-            <span>Subtotal</span>
-            <span>${calcularSubtotal().toFixed(2)}</span>
-          </div>
-          
-          {descuentoAplicado > 0 && (
-            <div className="resumen-fila resumen-descuento">
-              <span>Descuento (20%)</span>
-              <span>-${(calcularSubtotal() * descuentoAplicado).toFixed(2)}</span>
-            </div>
-          )}
-          
-          <div className="resumen-fila resumen-envio">
-            <span>Envío</span>
-            <span>
-              {calcularSubtotal() > 50 ? (
-                "Gratis"
-              ) : (
-                "$5.00"
-              )}
-            </span>
-          </div>
-          
-          <div className="resumen-fila resumen-total">
-            <span>Total</span>
-            <span>${calcularTotal().toFixed(2)}</span>
-          </div>
-          
-          <div className="resumen-descuento-input">
-            <input 
-              type="text" 
-              placeholder="Código de descuento" 
-              value={codigoDescuento}
-              onChange={(e) => setCodigoDescuento(e.target.value)}
-            />
-            <button 
-              className="carrito-btn-descuento"
-              onClick={aplicarDescuento}
-              disabled={!codigoDescuento}
-            >
-              Aplicar
-            </button>
-          </div>
-          
-          <p className="resumen-nota">* Prueba el código "DESCUENTO20" para obtener un 20% de descuento</p>
-          
-          <button className="carrito-btn-pagar">
-            Proceder al pago
-          </button>
+    <div className="cart-container">
+      <h2>Tu Carrito de Compras</h2>
 
-        </div>
+      <div className="cart-table-container">
+        <table className="cart-table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Nombre</th>
+              <th>Precio Unitario</th>
+              <th>Cantidad</th>
+              <th>Subtotal</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {productos.map((producto) => (
+              <tr key={producto.id} className="product-row">
+                <td className="product-image">
+                  <img src={producto.image} alt={producto.title} />
+                </td>
+                <td className="product-title">{producto.title}</td>
+                <td className="product-price">${producto.price.toFixed(2)}</td>
+                <td className="product-quantity">
+                  <div className="quantity-controls">
+                    <button
+                      onClick={() =>
+                        actualizarCantidad(producto.id, producto.cantidad - 1)
+                      }
+                      className="quantity-button"
+                    >
+                      -
+                    </button>
+                    <span className="quantity-value">{producto.cantidad}</span>
+                    <button
+                      onClick={() =>
+                        actualizarCantidad(producto.id, producto.cantidad + 1)
+                      }
+                      className="quantity-button"
+                    >
+                      +
+                    </button>
+                  </div>
+                </td>
+                <td className="product-subtotal">
+                  ${(producto.price * producto.cantidad).toFixed(2)}
+                </td>
+                <td className="product-actions">
+                  <button
+                    onClick={() => eliminarProducto(producto.id)}
+                    className="remove-button"
+                  >
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colSpan="4" className="total-label">
+                Total:
+              </td>
+              <td colSpan="2" className="total-amount">
+                ${calcularTotal()}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
       </div>
+
+      <button className="checkout-button">Proceder al Pago</button>
     </div>
   );
 };
