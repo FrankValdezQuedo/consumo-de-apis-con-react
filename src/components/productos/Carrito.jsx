@@ -1,247 +1,174 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
 import "../../estilos/Carrito.css";
+import { useCart } from "../contexto/CardContext";
 
 const Carrito = () => {
-  const [productos, setProductos] = useState([]); // Almacena los productos
-  const [cargando, setCargando] = useState(true); // Controla estado de carga
-  const [error, setError] = useState(null); // Maneja errores
-  const [cantidades, setCantidades] = useState({}); // Almacena cantidades de cada producto
+  const [productos, setProductos] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(null);
+  const [carritoVacio, setCarritoVacio] = useState(false);
+  const { removeFromCart } = useCart();
 
   useEffect(() => {
-    const ids = JSON.parse(localStorage.getItem("carrito")) || [];
+    cargarProductos();
+  }, []);
 
-    // Inicializar cantidades por defecto
-    const cantidadesIniciales = {};
-    ids.forEach((id) => {
-      cantidadesIniciales[id] = 1;
-    });
-    setCantidades(cantidadesIniciales);
+  const cargarProductos = async () => {
+    setCargando(true);
+    setError(null);
+    try {
+      // Obtener solo IDs del carrito
+      const idsCarrito = JSON.parse(localStorage.getItem("carrito")) || [];
 
-    const fetchProductos = async () => {
-      if (ids.length === 0) {
+      if (idsCarrito.length === 0) {
+        setProductos([]);
+        setCarritoVacio(true);
         setCargando(false);
         return;
       }
 
-      try {
-        const respuestas = await Promise.all(
-          ids.map((id) =>
-            axios.get(`${import.meta.env.VITE_API_URL}products/${id}`)
-          )
-        );
+      // Cargar productos y agregar cantidad inicial (1)
+      const productosData = await Promise.all(
+        idsCarrito.map((id) =>
+          axios
+            .get(`https://fakestoreapi.com/products/${id}`)
+            .then((res) => ({
+              ...res.data,
+              cantidad: 1, // Cantidad inicial por defecto
+            }))
+            .catch(() => null)
+        )
+      );
 
-        const data = respuestas.map((res) => res.data);
-        setProductos(data);
-      } catch (err) {
-        console.error("Error al cargar productos:", err);
-        setError("No pudimos cargar los productos. Intenta más tarde.");
-      } finally {
-        setCargando(false);
+      const productosValidos = productosData.filter(
+        (producto) => producto !== null
+      );
+
+      if (productosValidos.length === 0) {
+        setError("No se pudieron cargar los productos del carrito.");
+      } else {
+        setProductos(productosValidos);
       }
-    };
-
-    fetchProductos();
-  }, []); // Se ejecuta solo al montar el componente
-
-  // Aumentar la cantidad de un producto
-  const aumentarCantidad = (id) => {
-    setCantidades((prev) => ({
-      ...prev,
-      [id]: (prev[id] || 1) + 1,
-    }));
+    } catch (e) {
+      console.error("Error al cargar productos:", e);
+      setError("No pudimos cargar tus productos. Por favor intenta más tarde.");
+    } finally {
+      setCargando(false);
+    }
   };
 
-  // Disminuir la cantidad de un producto
-  const disminuirCantidad = (id) => {
-    setCantidades((prev) => ({
-      ...prev,
-      [id]: Math.max(1, (prev[id] || 1) - 1),
-    }));
+  const actualizarCantidad = (id, nuevaCantidad) => {
+    if (nuevaCantidad < 1) return;
+
+    setProductos((prevProductos) =>
+      prevProductos.map((producto) =>
+        producto.id === id ? { ...producto, cantidad: nuevaCantidad } : producto
+      )
+    );
   };
 
-  // Eliminar un producto del carrito
   const eliminarProducto = (id) => {
-    const carritoActual = JSON.parse(localStorage.getItem("carrito")) || [];
-    const nuevoCarrito = carritoActual.filter((itemId) => itemId !== id);
-    localStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
+    const nuevosProductos = productos.filter((producto) => producto.id !== id);
+    setProductos(nuevosProductos);
 
-    // Actualizar productos en el estado
-    setProductos((prev) => prev.filter((prod) => prod.id !== id));
+    // Actualizar localStorage con solo los IDs restantes
+    const nuevosIds = nuevosProductos.map((producto) => producto.id);
+    localStorage.setItem("carrito", JSON.stringify(nuevosIds));
+    removeFromCart(id);
 
-    // Eliminar la cantidad del producto
-    const nuevasCantidades = { ...cantidades };
-    delete nuevasCantidades[id];
-    setCantidades(nuevasCantidades);
+    if (nuevosProductos.length === 0) {
+      setCarritoVacio(true);
+    }
   };
 
-  // Vaciar carrito
-  const vaciarCarrito = () => {
-    localStorage.setItem("carrito", JSON.stringify([]));
-    setProductos([]);
-    setCantidades({});
+  const calcularTotal = () => {
+    return productos
+      .reduce(
+        (total, producto) => total + producto.price * producto.cantidad,
+        0
+      )
+      .toFixed(2);
   };
 
-  const total = productos.reduce(
-    (total, producto) =>
-      total + producto.price * (cantidades[producto.id] || 1),
-    0
-  );
-
-  if (cargando) {
-    return (
-      <div className="carrito-container">
-        <h1 className="carrito-titulo">Productos en el carrito</h1>
-        <div className="carrito-skeleton">
-          <div className="skeleton-item"></div>
-          <div className="skeleton-item"></div>
-          <div className="skeleton-item"></div>
-        </div>
-      </div>
-    );
-  }
-
-  // Mostrar mensaje de error
-  if (error) {
-    return (
-      <div className="carrito-container">
-        <div className="carrito-error">
-          <span className="carrito-error-icon">⚠️</span>
-          <h2>¡Ups! Algo salió mal</h2>
-          <p>{error}</p>
-          <button
-            className="carrito-btn"
-            onClick={() => window.location.reload()}
-          >
-            Intentar nuevamente
-          </button>
-        </div>
-      </div>
-    );
-  }
+  if (cargando) return <div className="loading">Cargando tu carrito...</div>;
+  if (error) return <div className="error-message">{error}</div>;
+  if (carritoVacio)
+    return <div className="empty-cart">Tu carrito está vacío</div>;
 
   return (
-    <div className="carrito-container">
-      <h1 className="carrito-titulo">Tu Carrito de Compras</h1>
+    <div className="cart-container">
+      <h2>Tu Carrito de Compras</h2>
 
-      {productos.length === 0 ? (
-        <div className="carrito-vacio">
-          <div className="carrito-vacio-icon">🛒</div>
-          <p>Tu carrito está vacío</p>
-          <p className="carrito-vacio-mensaje">
-            Parece que no has añadido productos a tu carrito de compras.
-          </p>
-          <Link to="/" className="carrito-btn carrito-btn-continuar">
-            Continuar comprando
-          </Link>
-        </div>
-      ) : (
-        <div className="carrito-contenido">
-          <div className="carrito-productos">
-            <div className="carrito-header">
-              <span className="carrito-header-producto">Producto</span>
-              <span className="carrito-header-precio">Precio</span>
-              <span className="carrito-header-cantidad">Cantidad</span>
-              <span className="carrito-header-total">SubTotal</span>
-              <span className="carrito-header-acciones"></span>
-            </div>
-
-            <div className="productos-lista">
-              {productos.map((prod) => (
-                <div key={prod.id} className="producto-item">
-                  <div className="producto-imagen-container">
-                    <img
-                      src={prod.image}
-                      alt={prod.title}
-                      className="producto-imagen"
-                    />
-                  </div>
-
-                  <div className="producto-info">
-                    <h3 className="producto-titulo">{prod.title}</h3>
-                    <span className="producto-categoria">{prod.category}</span>
-                  </div>
-
-                  <div className="producto-precio">
-                    ${prod.price.toFixed(2)}
-                  </div>
-
-                  <div className="producto-cantidad">
+      <div className="cart-table-container">
+        <table className="cart-table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Nombre</th>
+              <th>Precio Unitario</th>
+              <th>Cantidad</th>
+              <th>Subtotal</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {productos.map((producto) => (
+              <tr key={producto.id} className="product-row">
+                <td className="product-image">
+                  <img src={producto.image} alt={producto.title} />
+                </td>
+                <td className="product-title">{producto.title}</td>
+                <td className="product-price">${producto.price.toFixed(2)}</td>
+                <td className="product-quantity">
+                  <div className="quantity-controls">
                     <button
-                      className="cantidad-btn"
-                      onClick={() => disminuirCantidad(prod.id)}
-                      aria-label="Disminuir cantidad"
+                      onClick={() =>
+                        actualizarCantidad(producto.id, producto.cantidad - 1)
+                      }
+                      className="quantity-button"
                     >
-                      −
+                      -
                     </button>
-                    <span className="cantidad-valor">
-                      {cantidades[prod.id] || 1}
-                    </span>
+                    <span className="quantity-value">{producto.cantidad}</span>
                     <button
-                      className="cantidad-btn"
-                      onClick={() => aumentarCantidad(prod.id)}
-                      aria-label="Aumentar cantidad"
+                      onClick={() =>
+                        actualizarCantidad(producto.id, producto.cantidad + 1)
+                      }
+                      className="quantity-button"
                     >
                       +
                     </button>
                   </div>
+                </td>
+                <td className="product-subtotal">
+                  ${(producto.price * producto.cantidad).toFixed(2)}
+                </td>
+                <td className="product-actions">
+                  <button
+                    onClick={() => eliminarProducto(producto.id)}
+                    className="remove-button"
+                  >
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colSpan="4" className="total-label">
+                Total:
+              </td>
+              <td colSpan="2" className="total-amount">
+                ${calcularTotal()}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
 
-                  <div className="producto-total">
-                    ${(prod.price * (cantidades[prod.id] || 1)).toFixed(2)}
-                  </div>
-
-                  <div className="producto-acciones">
-                    <button
-                      className="btn-eliminar"
-                      onClick={() => eliminarProducto(prod.id)}
-                      aria-label="Eliminar producto"
-                    >
-                      ×
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="carrito-acciones">
-              <div className="carrito-acciones-izquierda">
-                <Link to="/" className="carrito-btn carrito-btn-secundario">
-                  ← Continuar comprando
-                </Link>
-                <button
-                  className="carrito-btn carrito-btn-vaciar"
-                  onClick={vaciarCarrito}
-                >
-                  Vaciar carrito
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="carrito-resumen">
-            <h2 className="resumen-titulo">Resumen del pedido</h2>
-
-            <div className="resumen-fila resumen-total">
-              <span>Total:</span>
-              <span>${total.toFixed(2)}</span>
-            </div>
-
-            <button className="carrito-btn carrito-btn-pagar">
-              Proceder al pago
-            </button>
-
-            <div className="resumen-pagos">
-              <p>Métodos de pago aceptados:</p>
-              <div className="metodos-pago">
-                <span className="metodo-pago">💳 Tarjeta</span>
-                <span className="metodo-pago">🏦 Transferencia</span>
-                <span className="metodo-pago">💰 PayPal</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <button className="checkout-button">Proceder al Pago</button>
     </div>
   );
 };

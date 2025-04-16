@@ -14,7 +14,7 @@ const Productos = () => {
     (async () => {
       try {
         const { data } = await axios.get(
-          `${import.meta.env.VITE_API_URL}products`
+          `https://fakestoreapi.com/products`
         );
         setProductos(data);
       } catch (err) {
