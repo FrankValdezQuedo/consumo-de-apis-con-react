@@ -1,4 +1,3 @@
-
 import { createContext, useState, useEffect, useContext } from "react";
 
 const CartContext = createContext();
@@ -25,9 +24,10 @@ export function CartProvider({ children }) {
     setCarrito(nuevoCarrito);
   };
 
-
   return (
-    <CartContext.Provider value={{ carrito, agregarAlCarrito,removeFromCart }}>
+    <CartContext.Provider
+      value={{ carrito, agregarAlCarrito, removeFromCart, setCarrito }}
+    >
       {children}
     </CartContext.Provider>
   );

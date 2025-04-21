@@ -8,6 +8,7 @@ import Home from "./components/Home/Home.jsx";
 import Carrito from "./components/productos/Carrito.jsx";
 import { CartProvider } from "./components/contexto/CardContext.jsx";
 import Login from "./components/login/Login.jsx";
+import Contacto from "./components/contacto/Contacto.jsx";
 
 createRoot(document.getElementById("root")).render(
   <>
@@ -18,6 +19,7 @@ createRoot(document.getElementById("root")).render(
             <Route index element={<Home />} />
             <Route path="productos" element={<Productos />} />
             <Route path="carrito" element={<Carrito />} />
+            <Route path="contacto" element={<Contacto />} />
           </Route>
           <Route path="*" element={<_404 />} />
           <Route path="/login" element={<Login />} />

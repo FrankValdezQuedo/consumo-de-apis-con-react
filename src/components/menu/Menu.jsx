@@ -60,16 +60,6 @@ const Menu = () => {
 
             <li className="menu-item">
               <NavLink
-                to="/saludo"
-                className={({ isActive }) => (isActive ? "active" : "")}
-                onClick={() => setMenuOpen(false)}
-              >
-                Saludo
-              </NavLink>
-            </li>
-
-            <li className="menu-item">
-              <NavLink
                 to="/productos"
                 className={({ isActive }) => (isActive ? "active" : "")}
                 onClick={() => setMenuOpen(false)}
