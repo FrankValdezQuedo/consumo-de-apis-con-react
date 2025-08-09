@@ -1,39 +1,37 @@
-import axios from "axios";
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router";
-import "./Login.css"; // We'll create this CSS file
+import "./Login.css";
 
 const Login = () => {
-  const [user, setUser] = useState({ username: "", password: "" });
+  const [user, setUser] = useState({
+    username: "prueba@gmail.com",
+    password: "1234",
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    // Basic validation
+    // Validación básica
     if (!user.username || !user.password) {
       setError("Por favor, introduzca el nombre de usuario y la contraseña");
       setLoading(false);
       return;
     }
 
-    try {
-      const response = await axios.post("https://reqres.in/api/login", {
-        email: user.username,
-        password: user.password,
-      });
-      localStorage.setItem("token", response.data.token);
+    // Validación contra usuario fijo
+    if (user.username === "prueba@gmail.com" && user.password === "1234") {
+      localStorage.setItem("token", "token_de_prueba_123");
       navigate("/");
-    } catch (err) {
-      setError(err.response?.data?.error || "Login failed. Please try again.");
-      console.error("Login error:", err);
-    } finally {
-      setLoading(false);
+    } else {
+      setError("Credenciales inválidas");
     }
+
+    setLoading(false);
   };
 
   if (localStorage.getItem("token")) {
@@ -72,7 +70,7 @@ const Login = () => {
           </div>
 
           <button type="submit" className="login-button" disabled={loading}>
-            {loading ? "Logging in..." : "Ingresar"}
+            {loading ? "Verificando..." : "Ingresar"}
           </button>
         </form>
 
